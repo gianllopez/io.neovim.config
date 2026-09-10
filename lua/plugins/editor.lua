@@ -391,6 +391,20 @@ return {
 						desc = "Filter files by status",
 					},
 					{
+						"<leader>ao",
+						function()
+							require("custom.audit").set_origin()
+						end,
+						desc = "Set current file origin",
+					},
+					{
+						"<leader>aP",
+						function()
+							require("custom.audit").set_production()
+						end,
+						desc = "Set current file production state",
+					},
+					{
 						"<leader>ah",
 						function()
 							require("custom.audit").history()

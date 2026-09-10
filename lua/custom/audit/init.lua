@@ -86,6 +86,98 @@ function M.open()
 	menu:mount()
 end
 
+function M.set_origin()
+	local menu = Menu({
+		position = "50%",
+		size = {
+			width = 28,
+			height = 2,
+		},
+		border = {
+			style = "rounded",
+			text = {
+				top = " Who wrote this file? ",
+				top_align = "center",
+			},
+		},
+	}, {
+		lines = {
+			Menu.item(" " .. constants.ORIGINS.ai.icon .. " -> AI", {
+				id = "ai",
+				icon = constants.ORIGINS.ai.icon,
+			}),
+			Menu.item(" " .. constants.ORIGINS.human.icon .. " -> Human", {
+				id = "human",
+				icon = constants.ORIGINS.human.icon,
+			}),
+		},
+		on_submit = function(item)
+			if not utils.save_tag("origin", item.id) then
+				vim.notify(
+					"Origin already set to `" .. item.id .. "` (" .. item.icon .. ")",
+					vim.log.levels.WARN,
+					{ title = "Audit" }
+				)
+				return
+			end
+
+			vim.notify(
+				"Origin set to `" .. item.id .. "` (" .. item.icon .. ")",
+				vim.log.levels.INFO,
+				{ title = "Audit" }
+			)
+		end,
+	})
+
+	menu:mount()
+end
+
+function M.set_production()
+	local menu = Menu({
+		position = "50%",
+		size = {
+			width = 28,
+			height = 2,
+		},
+		border = {
+			style = "rounded",
+			text = {
+				top = " Is this file deployed? ",
+				top_align = "center",
+			},
+		},
+	}, {
+		lines = {
+			Menu.item(" " .. constants.PRODUCTION[true].icon .. " -> Production", {
+				id = true,
+				icon = constants.PRODUCTION[true].icon,
+			}),
+			Menu.item(" " .. constants.PRODUCTION[false].icon .. " -> Staged", {
+				id = false,
+				icon = constants.PRODUCTION[false].icon,
+			}),
+		},
+		on_submit = function(item)
+			if not utils.save_tag("production", item.id) then
+				vim.notify(
+					"Production already set to `" .. tostring(item.id) .. "` (" .. item.icon .. ")",
+					vim.log.levels.WARN,
+					{ title = "Audit" }
+				)
+				return
+			end
+
+			vim.notify(
+				"Production set to `" .. tostring(item.id) .. "` (" .. item.icon .. ")",
+				vim.log.levels.INFO,
+				{ title = "Audit" }
+			)
+		end,
+	})
+
+	menu:mount()
+end
+
 function M.history()
 	local entry, file = utils.entry()
 
@@ -306,7 +398,20 @@ function M.status()
 		return ""
 	end
 
-	return constants.STATUSES[entry.status].icon .. " " .. entry.status
+	local label = constants.STATUSES[entry.status].icon .. " " .. entry.status
+
+	local origin = entry.origin and constants.ORIGINS[entry.origin]
+	local production = entry.production ~= nil and constants.PRODUCTION[entry.production]
+
+	if origin then
+		label = label .. " " .. origin.icon
+	end
+
+	if production then
+		label = label .. " " .. production.icon
+	end
+
+	return label
 end
 
 return M
