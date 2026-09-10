@@ -5,10 +5,6 @@ return {
 	},
 	ORIGINS = {
 		ai = { icon = "🤖", label = "AI" },
-		human = { icon = "🧑", label = "Human" },
-	},
-	PRODUCTION = {
-		[true] = { icon = "🚀", label = "Production" },
-		[false] = { icon = "🧪", label = "Staged" },
+		human = { icon = "👱🏻‍♂️", label = "Human" },
 	},
 }

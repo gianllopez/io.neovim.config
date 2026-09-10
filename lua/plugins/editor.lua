@@ -378,31 +378,39 @@ return {
 					},
 					{
 						"<leader>as",
+						group = "set",
+					},
+					{
+						"<leader>ass",
 						function()
 							require("custom.audit").open()
 						end,
 						desc = "Set current file status",
 					},
 					{
-						"<leader>af",
-						function()
-							require("custom.audit").filter()
-						end,
-						desc = "Filter files by status",
-					},
-					{
-						"<leader>ao",
+						"<leader>aso",
 						function()
 							require("custom.audit").set_origin()
 						end,
 						desc = "Set current file origin",
 					},
 					{
-						"<leader>aP",
+						"<leader>af",
+						group = "filter",
+					},
+					{
+						"<leader>afs",
 						function()
-							require("custom.audit").set_production()
+							require("custom.audit").filter()
 						end,
-						desc = "Set current file production state",
+						desc = "Filter files by status",
+					},
+					{
+						"<leader>afo",
+						function()
+							require("custom.audit").filter_by_origin()
+						end,
+						desc = "Filter files by origin",
 					},
 					{
 						"<leader>ah",
