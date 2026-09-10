@@ -86,6 +86,52 @@ function M.open()
 	menu:mount()
 end
 
+function M.set_origin()
+	local menu = Menu({
+		position = "50%",
+		size = {
+			width = 28,
+			height = 2,
+		},
+		border = {
+			style = "rounded",
+			text = {
+				top = " Who wrote this file? ",
+				top_align = "center",
+			},
+		},
+	}, {
+		lines = {
+			Menu.item(" " .. constants.ORIGINS.ai.icon .. " -> AI", {
+				id = "ai",
+				icon = constants.ORIGINS.ai.icon,
+			}),
+			Menu.item(" " .. constants.ORIGINS.human.icon .. " -> Human", {
+				id = "human",
+				icon = constants.ORIGINS.human.icon,
+			}),
+		},
+		on_submit = function(item)
+			if not utils.save_tag("origin", item.id) then
+				vim.notify(
+					"Origin already set to `" .. item.id .. "` (" .. item.icon .. ")",
+					vim.log.levels.WARN,
+					{ title = "Audit" }
+				)
+				return
+			end
+
+			vim.notify(
+				"Origin set to `" .. item.id .. "` (" .. item.icon .. ")",
+				vim.log.levels.INFO,
+				{ title = "Audit" }
+			)
+		end,
+	})
+
+	menu:mount()
+end
+
 function M.history()
 	local entry, file = utils.entry()
 
@@ -133,38 +179,29 @@ function M.history()
 	end)
 end
 
-function M.filter()
+local function filter_by(title, lines, predicate)
 	local menu = Menu({
 		position = "50%",
 		size = {
 			width = 28,
-			height = 2,
+			height = #lines,
 		},
 		border = {
 			style = "rounded",
 			text = {
-				top = " Filter by status ",
+				top = title,
 				top_align = "center",
 			},
 		},
 	}, {
-		lines = {
-			Menu.item(" " .. constants.STATUSES.pending.icon .. " -> Pending", {
-				id = "pending",
-				icon = constants.STATUSES.pending.icon,
-			}),
-			Menu.item(" " .. constants.STATUSES.done.icon .. " -> Done", {
-				id = "done",
-				icon = constants.STATUSES.done.icon,
-			}),
-		},
+		lines = lines,
 		on_submit = function(item)
 			local root = utils.root()
 			local database = utils.read(utils.path(root))
 			local files = {}
 
 			for file, data in pairs(database) do
-				if data.status == item.id then
+				if predicate(data, item) then
 					table.insert(files, file)
 				end
 			end
@@ -172,7 +209,7 @@ function M.filter()
 			table.sort(files)
 
 			if #files == 0 then
-				vim.notify("No files with status `" .. item.id .. "`", vim.log.levels.WARN, { title = "Audit" })
+				vim.notify("No files matching this filter", vim.log.levels.WARN, { title = "Audit" })
 				return
 			end
 
@@ -188,6 +225,36 @@ function M.filter()
 	})
 
 	menu:mount()
+end
+
+function M.filter()
+	filter_by(" Filter by status ", {
+		Menu.item(" " .. constants.STATUSES.pending.icon .. " -> Pending", {
+			id = "pending",
+			icon = constants.STATUSES.pending.icon,
+		}),
+		Menu.item(" " .. constants.STATUSES.done.icon .. " -> Done", {
+			id = "done",
+			icon = constants.STATUSES.done.icon,
+		}),
+	}, function(data, item)
+		return data.status == item.id
+	end)
+end
+
+function M.filter_by_origin()
+	filter_by(" Filter by origin ", {
+		Menu.item(" " .. constants.ORIGINS.ai.icon .. " -> AI", {
+			id = "ai",
+			icon = constants.ORIGINS.ai.icon,
+		}),
+		Menu.item(" " .. constants.ORIGINS.human.icon .. " -> Human", {
+			id = "human",
+			icon = constants.ORIGINS.human.icon,
+		}),
+	}, function(data, item)
+		return data.origin == item.id
+	end)
 end
 
 function M.bulk_set_as_pending()
@@ -306,7 +373,17 @@ function M.status()
 		return ""
 	end
 
-	return constants.STATUSES[entry.status].icon .. " " .. entry.status
+	local origin = entry.origin and constants.ORIGINS[entry.origin]
+
+	local label = ""
+
+	if origin then
+		label = label .. origin.icon .. " "
+	end
+
+	label = label .. constants.STATUSES[entry.status].icon .. " " .. entry.status
+
+	return label
 end
 
 return M

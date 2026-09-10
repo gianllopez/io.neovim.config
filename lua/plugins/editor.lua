@@ -18,6 +18,7 @@ return {
 					"%.env$",
 					"%.env%..*",
 					"%.gitignore",
+					"%.session",
 					"%.prettierrc%.yml",
 					"%.eslintrc.js",
 					"%.dockerignore",
@@ -377,17 +378,39 @@ return {
 					},
 					{
 						"<leader>as",
+						group = "set",
+					},
+					{
+						"<leader>ass",
 						function()
 							require("custom.audit").open()
 						end,
 						desc = "Set current file status",
 					},
 					{
+						"<leader>aso",
+						function()
+							require("custom.audit").set_origin()
+						end,
+						desc = "Set current file origin",
+					},
+					{
 						"<leader>af",
+						group = "filter",
+					},
+					{
+						"<leader>afs",
 						function()
 							require("custom.audit").filter()
 						end,
 						desc = "Filter files by status",
+					},
+					{
+						"<leader>afo",
+						function()
+							require("custom.audit").filter_by_origin()
+						end,
+						desc = "Filter files by origin",
 					},
 					{
 						"<leader>ah",

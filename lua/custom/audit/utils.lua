@@ -95,6 +95,32 @@ function M.save(status)
 	return true
 end
 
+function M.save_tag(field, value)
+	local root = M.root()
+	local file = M.relative(root)
+
+	if file == "" then
+		vim.notify("audit: no file open", vim.log.levels.WARN, { title = "Audit" })
+		return false
+	end
+
+	local path = M.path(root)
+	local database = M.read(path)
+	local entry = database[file] or { history = {} }
+
+	if entry[field] == value then
+		return false
+	end
+
+	entry[field] = value
+
+	database[file] = entry
+
+	M.write(path, database)
+
+	return true
+end
+
 function M.remove(root)
 	local file = M.relative(root)
 
